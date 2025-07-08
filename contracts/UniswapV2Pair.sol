@@ -73,4 +73,19 @@ contract UniswapV2Pair is UniswapV2ERC20 {
     constructor() {
         factory = msg.sender;
     }
+
+    function initialize(address _token0, address _token1) external {
+        require(msg.sender == factory,"UniswapV2: FORBIDDEN");
+        token0 = _token0;
+        token1 = _token1;
+    }
+
+    function _update(uint256 balance0, uint256 balance1, uint112 _reserve0, uint112 _reserve1) private {
+        require(balance0 <= type(uint112).max && balance1 <= type(uint112).max,"UniswapV2: OVERFLOW");
+        uint32 blockTimestamp = uint32(block.timestamp % 2** 32);
+        uint32 timeElapsed = blockTimestamp - blockTimestampLast;
+        if(timeElapsed > 0 && _reserve0 != 0 && _reserve1 != 0) {
+            
+        }
+    }
 }
