@@ -19,5 +19,18 @@ contract UniswapV2ERC20 {
     event Approval(address indexed owner, address indexed spender, uint value);
     event Transfer(address indexed from, address indexed to, uint value);
 
+    constructor () {
+        uint256 chainId = block.chainid;
+        DOMAIN_SEPARATOR = keccak256(
+            abi.encode(
+                keccak256("EIP712Domain(string name,string version,uint256 chainId, address VerifyingContract)"),
+                keccak256(bytes(name)),
+                keccak256(bytes("1")),
+                chainId,
+                address(this)
+            )
+        );
+    }
+    
 
 }
