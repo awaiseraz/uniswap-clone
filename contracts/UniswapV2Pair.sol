@@ -4,9 +4,9 @@ pragma solidity ^0.8.20;
 import "./UniswapV2ERC20.sol";
 
 contract UniswapV2Pair is UniswapV2ERC20 {
-
-    uint256 public constant MINIUM_LIQUIDITY = 10**3;
-    bytes4 private constant SELECTOR = bytes4(keccak256(bytes('transfer(address, uint256)')));
+    uint256 public constant MINIUM_LIQUIDITY = 10 ** 3;
+    bytes4 private constant SELECTOR =
+        bytes4(keccak256(bytes("transfer(address, uint256)")));
 
     address public factory;
     address public token0;
@@ -29,9 +29,48 @@ contract UniswapV2Pair is UniswapV2ERC20 {
         unlocked = 1;
     }
 
-    function getReserves() public view returns(uint112 _reserve0, uint112 _reserve1, uint32 _blockTimestampLast) {
+    function getReserves()
+        public
+        view
+        returns (
+            uint112 _reserve0,
+            uint112 _reserve1,
+            uint32 _blockTimestampLast
+        )
+    {
         _reserve0 = reserve0;
         _reserve1 = reserve1;
         _blockTimestampLast = blockTimestampLast;
+    }
+
+    function _safeTransfer(address token, address to, uint256 value) private {
+        (bool success, bytes memory data) = token.call(
+            abi.encodeWithSelector(SELECTOR, to, value)
+        );
+        require(
+            success && (data.length == 0 || abi.decode(data, (bool))),
+            "UniswapV2: TRANSFER_FAILED"
+        );
+    }
+
+    event Mint(address indexed sender, uint256 amount0, uint256 amount1);
+    event Burn(
+        address indexed sender,
+        uint256 amount0,
+        uint256 amount1,
+        address indexed to
+    );
+    event Swap(
+        address indexed sender,
+        uint256 amount0In,
+        uint256 amount1In,
+        uint256 amount0Out,
+        uint256 amount1Out,
+        address indexed to
+    );
+    event Sync(uint112 reserve0, uint112 reserve1);
+
+    constructor() {
+        factory = msg.sender;
     }
 }
