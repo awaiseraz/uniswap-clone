@@ -2,8 +2,10 @@
 pragma solidity ^0.8.20;
 
 import "./UniswapV2ERC20.sol";
+import "./libraries/UQ112x112.sol";
 
 contract UniswapV2Pair is UniswapV2ERC20 {
+    using UQ112x112 for uint224; 
     uint256 public constant MINIUM_LIQUIDITY = 10 ** 3;
     bytes4 private constant SELECTOR =
         bytes4(keccak256(bytes("transfer(address, uint256)")));
@@ -85,7 +87,12 @@ contract UniswapV2Pair is UniswapV2ERC20 {
         uint32 blockTimestamp = uint32(block.timestamp % 2** 32);
         uint32 timeElapsed = blockTimestamp - blockTimestampLast;
         if(timeElapsed > 0 && _reserve0 != 0 && _reserve1 != 0) {
-            
+            price0CumulativeLast += uint(UQ112x112.encode(_reserve1).uqdiv(reserve0)) * timeElapsed;
+            price1CumulativeLast += uint(UQ112x112.encode(_reserve0).uqdiv(reserve1)) * timeElapsed;
         }
+        reserve0 = uint112(balance0);
+        reserve1 = uint112(balance1);
+        blockTimestampLast = blockTimestamp;
+        emit Sync(reserve0, reserve1);
     }
 }
