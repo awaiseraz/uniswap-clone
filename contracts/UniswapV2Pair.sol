@@ -2,9 +2,10 @@
 pragma solidity ^0.8.20;
 
 import "./UniswapV2ERC20.sol";
+import "./UniswapV2Factory.sol";
 import "./libraries/UQ112x112.sol";
 
-contract UniswapV2Pair is UniswapV2ERC20 {
+contract UniswapV2Pair is UniswapV2ERC20, UniswapV2Factory {
     using UQ112x112 for uint224; 
     uint256 public constant MINIUM_LIQUIDITY = 10 ** 3;
     bytes4 private constant SELECTOR =
@@ -94,5 +95,10 @@ contract UniswapV2Pair is UniswapV2ERC20 {
         reserve1 = uint112(balance1);
         blockTimestampLast = blockTimestamp;
         emit Sync(reserve0, reserve1);
+    }
+
+    function _mintFee(uint112 _reserve0, uint112 _reserve1) private returns (bool feeOn) {
+        address feeTo = UniswapV2Factory.feeTo();
+        feeOn = feeTo != address(0);
     }
 }
